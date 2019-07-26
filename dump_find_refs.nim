@@ -1,7 +1,7 @@
 import osproc, os, strformat, strutils
 
 # TODO This could be provived as an arg
-var unityProjectRoot: string = "./"
+var unityProjectRoot: string = getCurrentDir()
 
 var debug: bool = false
 
@@ -9,7 +9,7 @@ proc debugLog(s: string) =
   if debug: echo s
 
 proc assetPath(): string =
-  result = &"{unityProjectRoot}Assets"
+  result = &"{unityProjectRoot}/Assets"
 
 proc outIfErr(output: string, errC: int) =
   if errC != 0:
