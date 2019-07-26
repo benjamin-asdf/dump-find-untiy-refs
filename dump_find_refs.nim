@@ -21,6 +21,7 @@ proc trimNewLine(s: var string) =
 
 
 proc getUnityGuid(file: string): string =
+  # TODO I guess this usages of awk is retarded and we would split the string ourselves
   let awkcmd = """awk '{print $2}'"""
   let cmd = &"rg --no-ignore guid: {file}.meta | {awkcmd}"
   debugLog(&"get unity guid... cmd is:\n{cmd}")
@@ -30,7 +31,8 @@ proc getUnityGuid(file: string): string =
   result = guid
 
 proc getDefinitionFiles(s: string): TaintedString =
-  let findFilesCmd = &"rg -l --no-ignore {s} {assetPath()}"
+  # let findFilesCmd = &"rg -l --no-ignore {s} {assetPath()}"
+  let findFilesCmd = &"global -d {s} {assetPath()}"
   debugLog(&"get definition files... cmd is:\n{findFilesCmd}")
   var (files, errC) = execCmdEx(findFilesCmd)
   outIfErr(files,errC)
@@ -49,15 +51,15 @@ if paramCount() == 0:
 if paramCount() > 1 and paramStr(2) == "-d":
   debug = true
 
-let files = getDefinitionFiles(paramStr(1))
-
-for file in splitLines(files):
+let typeQuery = paramStr(1)
+for file in splitLines(getDefinitionFiles(typeQuery)):
   if file != "":
     let guid = getUnityGuid(file)
-    let cmd = &"rg -l --no-ignore -e \'guid: {guid}\' {assetPath()}"
+    # we put the ',' here after the guid num, because we don't output meta files that way
+    let cmd = &"rg -l --no-ignore -e \'guid: {guid},\' {assetPath()}"
     let (usages, errC) = execCmdEx(cmd)
     outIfErr(usages, errC)
     for usagePath in splitLines(usages):
       if usagePath != "":
         echo &"{splitfile(file).name} {usagePath}"
-  else: echo "Warning! - handled an empty line, should not happen."
+  else: echo "Query did not represent any type defined in the assetPath."
