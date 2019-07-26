@@ -1,3 +1,2 @@
-- maybe format, so it says the name
-- maybe format the output in general nicer so it says the input and stuff
 - maybe format the output really nice in general, so it can easily be used by other programms
+- could have some arg like "show guid"
