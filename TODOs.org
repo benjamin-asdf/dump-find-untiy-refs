@@ -1,2 +1,4 @@
 - maybe format the output really nice in general, so it can easily be used by other programms
 - could have some arg like "show guid"
+
+- make multiple inputs seperated by space possible (future: handle names with spaces)

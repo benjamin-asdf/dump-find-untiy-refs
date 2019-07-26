@@ -31,10 +31,13 @@ proc getUnityGuid(file: string): string =
   result = guid
 
 proc getDefinitionFiles(s: string): TaintedString =
-  # let findFilesCmd = &"rg -l --no-ignore {s} {assetPath()}"
   let findFilesCmd = &"global -d {s} {assetPath()}"
   debugLog(&"get definition files... cmd is:\n{findFilesCmd}")
   var (files, errC) = execCmdEx(findFilesCmd)
+  if files == "" or errC != 0:
+    let fallBackCmd = &"rg -l --no-ignore -e \"class\\s+{s}\\s+:\\s+MonoBehaviour\" {assetPath()}"
+    echo &"doing fallback cmd.. {fallBackCmd}"
+    (files, errC) = execCmdEx(fallBackCmd)
   outIfErr(files,errC)
   files.trimNewLine()
   result = files
@@ -62,4 +65,4 @@ for file in splitLines(getDefinitionFiles(typeQuery)):
     for usagePath in splitLines(usages):
       if usagePath != "":
         echo &"{splitfile(file).name} {usagePath}"
-  else: echo "Query did not represent any type defined in the assetPath."
+  else: echo &"Dump find was unable to find definitions for type: \"{typeQuery}\""
