@@ -24,7 +24,7 @@ proc getUnityGuid(file: string): string =
   # TODO I guess this usages of awk is retarded and we would split the string ourselves
   let awkcmd = """awk '{print $2}'"""
   let cmd = &"rg --no-ignore guid: {file}.meta | {awkcmd}"
-  debugLog(&"get unity guid... cmd is:\n{cmd}")
+  debugLog &"get unity guid... cmd is:\n{cmd}"
   var (guid, errc) = execCmdEx(cmd)
   outIfErr(guid,errc)
   guid.trimNewLine()
@@ -32,11 +32,11 @@ proc getUnityGuid(file: string): string =
 
 proc getDefinitionFiles(s: string): TaintedString =
   let findFilesCmd = &"global -d {s} {assetPath()}"
-  debugLog(&"get definition files... cmd is:\n{findFilesCmd}")
+  debugLog &"get definition files... cmd is:\n{findFilesCmd}"
   var (files, errC) = execCmdEx(findFilesCmd)
   if files == "" or errC != 0:
     let fallBackCmd = &"rg -l --no-ignore -e \"class\\s+{s}\\s+:\\s+MonoBehaviour\" {assetPath()}"
-    echo &"doing fallback cmd.. {fallBackCmd}"
+    debugLog &"doing fallback cmd.. {fallBackCmd}"
     (files, errC) = execCmdEx(fallBackCmd)
   outIfErr(files,errC)
   files.trimNewLine()
