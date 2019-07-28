@@ -8,3 +8,4 @@
   - the guid in the output
   - the file name only in the output (without the name of the type)
   -
+- fix typo, should be dumb, not dump. :facepalm:
