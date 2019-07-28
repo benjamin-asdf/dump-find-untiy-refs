@@ -64,5 +64,5 @@ for file in splitLines(getDefinitionFiles(typeQuery)):
     outIfErr(usages, errC)
     for usagePath in splitLines(usages):
       if usagePath != "":
-        echo &"{splitfile(file).name} {relativePath(usagePath,getCurrentDir())}"
+        echo &"{splitfile(file).name} {relativePath(usagePath,unityProjectRoot)}"
   else: echo &"Dump find was unable to find definitions for type: \"{typeQuery}\""
