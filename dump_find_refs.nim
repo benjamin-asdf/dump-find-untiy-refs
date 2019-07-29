@@ -35,9 +35,10 @@ proc getDefinitionFiles(s: string): TaintedString =
   debugLog &"get definition files... cmd is:\n{findFilesCmd}"
   var (files, errC) = execCmdEx(findFilesCmd)
   if files == "" or errC != 0:
-    let fallBackCmd = &"rg -l --no-ignore -e \"class\\s+{s}\\s+:\\s+MonoBehaviour\" {assetPath()}"
-    debugLog &"doing fallback cmd.. {fallBackCmd}"
+    let fallBackCmd = &"rg -l --no-ignore -e \"class\\s+{s}\\s+:\" {assetPath()}"
     (files, errC) = execCmdEx(fallBackCmd)
+    # rg no match
+    if errC == 1: return ""
   outIfErr(files,errC)
   files.trimNewLine()
   result = files
@@ -58,9 +59,11 @@ let typeQuery = paramStr(1)
 for file in splitLines(getDefinitionFiles(typeQuery)):
   if file != "":
     let guid = getUnityGuid(file)
-    # we put the ',' here after the guid num, because we don't output meta files that way
+    # we put the ',' here after the guid enum, because we don't output meta files that way
     let cmd = &"rg -l --no-ignore -e \'guid: {guid},\' {assetPath()}"
+    debugLog &"try get guids, cmd: {cmd}"
     let (usages, errC) = execCmdEx(cmd)
+    if (errC != 0): debugLog "error while getting guids"
     outIfErr(usages, errC)
     for usagePath in splitLines(usages):
       if usagePath != "":
