@@ -19,9 +19,6 @@ proc outIfErr(output: string, errC: int) =
 proc trimNewLine(s: var string) =
   s.removeSuffix('\n')
 
-proc sanitizePath(path: string ): string =
-  result = replace(path,"\\","/")
-
 # proc cmdExists(c: string): bool =
 #   try:
 #     discard cmdExec(c)
@@ -32,12 +29,11 @@ proc sanitizePath(path: string ): string =
 proc getUnityGuid(file: string): string =
   # TODO I guess this usages of awk is retarded and we would split the string ourselves
   # var (file, err) = execCmdEx(&"sed 's|\\\")
-  let cmd = &"rg --no-ignore guid: {sanitizePath(file)}.meta"
+  let cmd = &"rg --no-ignore guid: {file}.meta"
   debugLog &"get unity guid... cmd is:\n{cmd}"
-
   var (rgGuidOutput, errc) = execCmdEx(cmd)
   outIfErr(rgGuidOutput,errc)
-  var guid = rgGuidOutput.split(' ')[0]
+  var guid = rgGuidOutput.split(' ')[1]
   guid.trimNewLine()
   result = guid
 
@@ -74,8 +70,9 @@ for file in splitLines(getDefinitionFiles(typeQuery)):
   if file != "":
     let guid = getUnityGuid(file)
     # we put the ',' here after the guid enum, because we don't output meta files that way
-    let cmd = &"rg -l --no-ignore -e \'guid: {guid},\' Assets/"
-    debugLog &"try get guids, cmd: {cmd}"
+    debugLog(&"guid is {guid}")
+    let cmd = &"rg -l --no-ignore -e \"guid: {guid},\" {assetPath()}"
+    debugLog &"try get files with guid {guid}, cmd: {cmd}"
     let (usages, errC) = execCmdEx(cmd)
     if (errC != 0): debugLog "error while getting guids"
     outIfErr(usages, errC)
