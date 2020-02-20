@@ -19,32 +19,15 @@ proc outIfErr(output: string, errC: int) =
 proc trimNewLine(s: var string) =
   s.removeSuffix('\n')
 
-# proc cmdExists(c: string): bool =
-#   try:
-#     discard cmdExec(c)
-#     result = true
-#   except OSError:
-#     result = false
-
 proc getUnityGuid(file: string): string =
-  # TODO I guess this usages of awk is retarded and we would split the string ourselves
-  # var (file, err) = execCmdEx(&"sed 's|\\\")
   let cmd = &"rg --no-ignore guid: {file}.meta"
   debugLog &"get unity guid... cmd is:\n{cmd}"
   var (rgGuidOutput, errc) = execCmdEx(cmd)
   outIfErr(rgGuidOutput,errc)
-  var guid = rgGuidOutput.split(' ')[1]
-  guid.trimNewLine()
-  result = guid
+  result = rgGuidOutput.split(' ')[1].trimNewLine()
 
 
 proc getDefinitionFiles(s: string): TaintedString =
-
-  # let findFilesCmd = &"global -d {s} {assetPath()}"
-  # debugLog &"get definition files... cmd is:\n{findFilesCmd}"
-  # var (files, errC) = execCmdEx(findFilesCmd)
-  # if files == "" or errC != 0:
-
   let fallBackCmd = &"rg -l --no-ignore -e \"class\\s+{s}\\s+:\" {assetPath()}"
   var (files, errC) = execCmdEx(fallBackCmd)
   # rg no match
@@ -74,6 +57,9 @@ for file in splitLines(getDefinitionFiles(typeQuery)):
     let cmd = &"rg -l --no-ignore -e \"guid: {guid},\" {assetPath()}"
     debugLog &"try get files with guid {guid}, cmd: {cmd}"
     let (usages, errC) = execCmdEx(cmd)
+    if (errC == 1):
+      echo &"Dumb find was unable to find definitions for type: \"{typeQuery}\""
+      quit(0)
     if (errC != 0): debugLog "error while getting guids"
     outIfErr(usages, errC)
     for usagePath in splitLines(usages):
