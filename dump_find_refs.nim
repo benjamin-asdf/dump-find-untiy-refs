@@ -24,7 +24,9 @@ proc getUnityGuid(file: string): string =
   debugLog &"get unity guid... cmd is:\n{cmd}"
   var (rgGuidOutput, errc) = execCmdEx(cmd)
   outIfErr(rgGuidOutput,errc)
-  result = rgGuidOutput.split(' ')[1].trimNewLine()
+  var guid = rgGuidOutput.split(' ')[1]
+  guid.trimNewLine()
+  result = guid
 
 
 proc getDefinitionFiles(s: string): TaintedString =
