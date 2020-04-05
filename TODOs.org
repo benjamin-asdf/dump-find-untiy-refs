@@ -9,4 +9,5 @@
   - the file name only in the output (without the name of the type)
   -
 - fix typo, should be dumb, not dump. :facepalm:
- 
+
+* support searching where prefab assets are used

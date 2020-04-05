@@ -25,10 +25,12 @@ proc getUnityGuid(file: string): string =
   let awkcmd = """awk '{print $2}'"""
   let cmd = &"rg --no-ignore guid: {file}.meta | {awkcmd}"
   debugLog &"get unity guid... cmd is:\n{cmd}"
-  var (guid, errc) = execCmdEx(cmd)
-  outIfErr(guid,errc)
+  var (rgGuidOutput, errc) = execCmdEx(cmd)
+  outIfErr(rgGuidOutput,errc)
+  var guid = rgGuidOutput.split(' ')[1]
   guid.trimNewLine()
   result = guid
+
 
 proc getDefinitionFiles(s: string): TaintedString =
   let findFilesCmd = &"global -d {s} {assetPath()}"
