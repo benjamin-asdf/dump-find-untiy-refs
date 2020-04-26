@@ -21,9 +21,7 @@ proc trimNewLine(s: var string) =
 
 
 proc getUnityGuid(file: string): string =
-  # TODO I guess this usages of awk is retarded and we would split the string ourselves
-  let awkcmd = """awk '{print $2}'"""
-  let cmd = &"rg --no-ignore guid: {file}.meta | {awkcmd}"
+  let cmd = &"rg --no-ignore guid: {file}.meta"
   debugLog &"get unity guid... cmd is:\n{cmd}"
   var (rgGuidOutput, errc) = execCmdEx(cmd)
   outIfErr(rgGuidOutput,errc)
@@ -65,6 +63,9 @@ for file in splitLines(getDefinitionFiles(typeQuery)):
     let cmd = &"rg -l --no-ignore -e \'guid: {guid},\' {assetPath()}"
     debugLog &"try get guids, cmd: {cmd}"
     let (usages, errC) = execCmdEx(cmd)
+    if (errC == 1):
+      echo &"Dumb found the guid {guid}, but was unable to find any refs. \"{typeQuery}\""
+      quit(0)
     if (errC != 0): debugLog "error while getting guids"
     outIfErr(usages, errC)
     for usagePath in splitLines(usages):
